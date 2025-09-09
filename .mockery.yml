@@ -1,0 +1,27 @@
+all: false
+dir: '{{.InterfaceDir}}/__mocks__'
+filename: mocks.go
+force-file-write: true
+formatter: goimports
+include-auto-generated: false
+log-level: info
+structname: '{{.Mock}}{{.InterfaceName}}'
+pkgname: '{{.SrcPackageName}}_mocks'
+recursive: false
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
+packages:
+  github.com/AlexMickh/coledzh-shop-backend/internal/services/auth:
+    interfaces: 
+      Storage:
+      SessionStore:
+  github.com/AlexMickh/coledzh-shop-backend/internal/services/token:
+    interfaces: 
+      Storage:
+      UserService:
+  github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/auth/register:
+    interfaces: 
+      Registerer:
+      TokenCreator:
+      VerificationSender:

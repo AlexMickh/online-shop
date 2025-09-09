@@ -1,0 +1,37 @@
+version: "3"
+
+tasks:
+  build:
+    cmds:
+      - go build -o ./bin/app ./cmd/app/main.go
+  run:
+    deps: [compose, build]
+    env:
+      CONFIG_PATH: ./config/local.yml
+    cmds:
+      - ./bin/app
+  test:
+    cmds:
+      - go test -v -race ./...
+  lint:
+    cmds:
+      - golangci-lint run ./...
+  set-env:
+    cmds:
+      - rm -rf .env
+      - go run ./cmd/env-setter/main.go --config=./config/local.yml
+  compose:
+    deps: [set-env]
+    cmds:
+      - docker compose up -d
+      - sleep 3
+  create-admin:
+    deps: [compose]
+    cmds:
+      - go run cmd/create-admin/main.go --config=./config/local.yml
+  cov:
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -func=coverage.out
+      - go tool cover -html=coverage.out -o coverage.html
+      - rm coverage.out
