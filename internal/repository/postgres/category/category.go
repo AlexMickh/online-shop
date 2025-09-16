@@ -1,4 +1,4 @@
-package category
+package category_repository
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/AlexMickh/coledzh-shop-backend/internal/errs"
+	"github.com/AlexMickh/coledzh-shop-backend/internal/models"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -36,4 +37,31 @@ func (p *Postgres) SaveCategory(ctx context.Context, id string, name string) err
 	}
 
 	return nil
+}
+
+func (p *Postgres) AllCategories(ctx context.Context) ([]models.Category, error) {
+	const op = "repository.postgres.category.AllCategories"
+
+	query := "SELECT id, name FROM categories"
+	rows, err := p.db.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	defer rows.Close()
+
+	categories := make([]models.Category, 0)
+	for rows.Next() {
+		var category models.Category
+		err := rows.Scan(&category.ID, &category.Name)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+		categories = append(categories, category)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return categories, nil
 }

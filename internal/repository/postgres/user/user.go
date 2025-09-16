@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/AlexMickh/coledzh-shop-backend/internal/consts"
 	"github.com/AlexMickh/coledzh-shop-backend/internal/errs"
 	"github.com/AlexMickh/coledzh-shop-backend/internal/models"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -50,7 +51,7 @@ func (p *Postgres) SaveAdmin(ctx context.Context, login, email, password string)
 	query := `INSERT INTO users 
 			  (login, email, password, role, is_email_verified)
 			  VALUES ($1, $2, $3, $4, $5)`
-	_, err := p.db.Exec(ctx, query, login, email, password, "admin", true)
+	_, err := p.db.Exec(ctx, query, login, email, password, consts.RoleAdmin, true)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {

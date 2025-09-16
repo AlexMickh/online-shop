@@ -8,3 +8,8 @@ type User struct {
 	Role            string `redis:"role"`
 	IsEmailVerified bool
 }
+
+type Category struct {
+	ID   string `redis:"-"`
+	Name string `redis:"name"`
+}

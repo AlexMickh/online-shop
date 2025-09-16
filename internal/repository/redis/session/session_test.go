@@ -22,7 +22,7 @@ func TestCash_SaveSession(t *testing.T) {
 		user models.User
 	}
 
-	rdb := initCash()
+	rdb := initCash(t)
 	defer rdb.Close()
 
 	tests := []struct {
@@ -67,7 +67,19 @@ func TestCash_SaveSession(t *testing.T) {
 	}
 }
 
-func initCash() *redis.Client {
+func initCash(t *testing.T) *redis.Client {
+	t.Helper()
+
+	// db, err := strconv.Atoi("REDIS_DB")
+	// if err != nil {
+	// 	t.Fatalf("failed to init cash: %v", err)
+	// }
+
+	// rdb := redis.NewClient(&redis.Options{
+	// 	Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
+	// 	Password: os.Getenv("REDIS_PASSWORD"),
+	// 	DB:       db,
+	// })
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6359",
 		Password: "root",

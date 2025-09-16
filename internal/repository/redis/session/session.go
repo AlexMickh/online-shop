@@ -36,3 +36,15 @@ func (c *Cash) SaveSession(ctx context.Context, id string, user models.User) err
 
 	return nil
 }
+
+func (c *Cash) SessionById(ctx context.Context, sessionId string) (models.User, error) {
+	const op = "repository.redis.session.SessionById"
+
+	var user models.User
+	err := c.rdb.HGetAll(ctx, sessionId).Scan(&user)
+	if err != nil {
+		return models.User{}, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return user, nil
+}

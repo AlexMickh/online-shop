@@ -36,6 +36,22 @@ type VerificationSender interface {
 	SendVerification(to string, token, login string) error
 }
 
+// New godoc
+//
+//	@Summary		register user
+//	@Description	register user
+//	@Tags			auth
+//	@Accept			json
+//
+//	@Produce		json
+//
+//	@Param			login		body		string	true	"User login"
+//	@Param			email		body		string	true	"User email"	Format(email)
+//	@Param			password	body		string	true	"User password"
+//	@Success		201			{object}	Response
+//	@Failure		400			{object}	api.ErrorResponse
+//	@Failure		500			{object}	api.ErrorResponse
+//	@Router			/auth/register [post]
 func New(
 	validator *validator.Validate,
 	registerer Registerer,

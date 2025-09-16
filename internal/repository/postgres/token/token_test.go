@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/AlexMickh/coledzh-shop-backend/internal/consts"
@@ -70,15 +71,16 @@ func TestPostgres_SaveToken(t *testing.T) {
 func initStorage() *pgxpool.Pool {
 	// TODO: change to config vars
 	connString := fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=disable&pool_max_conns=%d&pool_min_conns=%d",
-		"postgres",
-		"root",
-		"localhost",
-		5499,
-		"store",
-		3,
-		5,
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable&pool_max_conns=%s&pool_min_conns=%s",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+		os.Getenv("DB_MIN_POOLS"),
+		os.Getenv("DB_MAX_POOLS"),
 	)
+	fmt.Println("ENV: ", os.Getenv("MIGRATIONS_PATH"))
 
 	pool, _ := pgxpool.New(context.Background(), connString)
 

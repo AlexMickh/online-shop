@@ -2,13 +2,10 @@ package postgresql
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/AlexMickh/coledzh-shop-backend/pkg/utils/retry"
-	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -53,17 +50,17 @@ func New(
 			return fmt.Errorf("%s: %w", op, err)
 		}
 
-		m, err := migrate.New(
-			"file://"+migrationsPath,
-			strings.Split(connString, "&")[0],
-		)
-		if err != nil {
-			return fmt.Errorf("%s: %w", op, err)
-		}
+		// m, err := migrate.New(
+		// 	"file://"+migrationsPath,
+		// 	strings.Split(connString, "&")[0],
+		// )
+		// if err != nil {
+		// 	return fmt.Errorf("%s: %w", op, err)
+		// }
 
-		if err = m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-			return fmt.Errorf("%s: %w", op, err)
-		}
+		// if err = m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		// 	return fmt.Errorf("%s: %w", op, err)
+		// }
 
 		return nil
 	})

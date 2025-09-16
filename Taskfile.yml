@@ -1,16 +1,45 @@
 version: "3"
 
+dotenv:
+  - .env
+
 tasks:
+  swag:
+    cmds:
+      - swag fmt
+      - swag init -d ./internal/server -g server.go --pdl 3
+  migrate:
+    deps: [set-env]
+    env:
+      DB_HOST: "{{.DB_HOST}}"
+      DB_PORT: "{{.DB_PORT}}"
+      DB_USER: "{{.DB_USER}}"
+      DB_PASSWORD: "{{.DB_PASSWORD}}"
+      DB_NAME: "{{.DB_NAME}}"
+      MIGRATIONS_PATH: "{{.MIGRATIONS_PATH}}"
+    cmds:
+      - go run ./cmd/migrator/main.go
   build:
+    deps: [swag]
     cmds:
       - go build -o ./bin/app ./cmd/app/main.go
   run:
-    deps: [compose, build]
+    deps: [compose, build, migrate]
     env:
       CONFIG_PATH: ./config/local.yml
     cmds:
       - ./bin/app
   test:
+    deps: [set-env, migrate]
+    env:
+      DB_HOST: "{{.DB_HOST}}"
+      DB_PORT: "{{.DB_PORT}}"
+      DB_USER: "{{.DB_USER}}"
+      DB_PASSWORD: "{{.DB_PASSWORD}}"
+      DB_NAME: "{{.DB_NAME}}"
+      DB_MIN_POOLS: "{{.DB_MIN_POOLS}}"
+      DB_MAX_POOLS: "{{.DB_MAX_POOLS}}"
+      MIGRATIONS_PATH: "{{.MIGRATIONS_PATH}}"
     cmds:
       - go test -v -race ./...
   lint:
@@ -26,10 +55,11 @@ tasks:
       - docker compose up -d
       - sleep 3
   create-admin:
-    deps: [compose]
+    deps: [compose, migrate]
     cmds:
       - go run cmd/create-admin/main.go --config=./config/local.yml
   cov:
+    deps: [set-env]
     cmds:
       - go test -coverprofile=coverage.out ./...
       - go tool cover -func=coverage.out

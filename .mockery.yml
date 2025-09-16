@@ -25,3 +25,7 @@ packages:
       Registerer:
       TokenCreator:
       VerificationSender:
+  github.com/AlexMickh/coledzh-shop-backend/internal/services/category:
+    interfaces: 
+      Repository:
+      Cash:

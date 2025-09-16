@@ -26,6 +26,22 @@ type SessionCreator interface {
 	Create(w http.ResponseWriter, sessionId string)
 }
 
+// New godoc
+//
+//	@Summary		login user
+//	@Description	login user
+//	@Tags			auth
+//	@Accept			json
+//
+//	@Produce		json
+//
+//	@Param			email		body	string	true	"User email"	Format(email)
+//	@Param			password	body	string	true	"User password"
+//	@Success		201
+//	@Failure		400	{object}	api.ErrorResponse
+//	@Failure		404	{object}	api.ErrorResponse
+//	@Failure		500	{object}	api.ErrorResponse
+//	@Router			/auth/login [post]
 func New(loginer Loginer, validator validator.Validate, sessionCreator SessionCreator) api.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		const op = "handlers.auth.login.New"

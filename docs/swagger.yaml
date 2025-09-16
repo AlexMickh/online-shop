@@ -1,0 +1,206 @@
+definitions:
+  api.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  create_category.Response:
+    properties:
+      id:
+        type: string
+    type: object
+  get_category.Response:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/get_category.category'
+        type: array
+    type: object
+  get_category.category:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  register.Response:
+    properties:
+      id:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Your API description
+  title: Your API
+  version: "1.0"
+paths:
+  /admin/create-category:
+    post:
+      consumes:
+      - application/json
+      description: create new category
+      parameters:
+      - description: category name
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/create_category.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - SessionAuth: []
+      summary: create new category
+      tags:
+      - admin
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: login user
+      parameters:
+      - description: User email
+        format: email
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      - description: User password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: login user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: register user
+      parameters:
+      - description: User login
+        in: body
+        name: login
+        required: true
+        schema:
+          type: string
+      - description: User email
+        format: email
+        in: body
+        name: email
+        required: true
+        schema:
+          type: string
+      - description: User password
+        in: body
+        name: password
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/register.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: register user
+      tags:
+      - auth
+  /auth/verify/{token}:
+    get:
+      consumes:
+      - application/json
+      description: verify user email
+      parameters:
+      - description: token
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: verify user email
+      tags:
+      - auth
+  /category:
+    get:
+      consumes:
+      - application/json
+      description: returns all categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/get_category.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: returns all categories
+      tags:
+      - category
+securityDefinitions:
+  SessionAuth:
+    in: cookie
+    name: session_id
+    type: apiKey
+swagger: "2.0"

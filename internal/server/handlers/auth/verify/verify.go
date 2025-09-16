@@ -15,6 +15,21 @@ type TokenService interface {
 	VerifyEmail(ctx context.Context, token string) error
 }
 
+// New godoc
+//
+//	@Summary		verify user email
+//	@Description	verify user email
+//	@Tags			auth
+//	@Accept			json
+//
+//	@Produce		json
+//
+//	@Param			token	path	string	true	"token"
+//	@Success		204
+//	@Failure		400	{object}	api.ErrorResponse
+//	@Failure		404	{object}	api.ErrorResponse
+//	@Failure		500	{object}	api.ErrorResponse
+//	@Router			/auth/verify/{token} [get]
 func New(tokenService TokenService) api.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		const op = "handlers.auth.validate.New"

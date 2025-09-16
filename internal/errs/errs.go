@@ -9,4 +9,6 @@ var (
 	ErrEmailNotVerify        = errors.New("email not verify")
 	ErrTokenNotFound         = errors.New("token not found")
 	ErrCategoryAlreadyExists = errors.New("category already axists")
+	ErrNotAdmin              = errors.New("user does not admin")
+	ErrFailedToCash          = errors.New("failed to cashed data")
 )

@@ -25,7 +25,20 @@ type CategoryCreator interface {
 	CreateCategory(ctx context.Context, name string) (string, error)
 }
 
-func New(categoryCreator CategoryCreator, validator validator.Validate) api.HandlerFunc {
+// New godoc
+//
+//	@Summary		create new category
+//	@Description	create new category
+//	@Tags			admin
+//	@Accept			json
+//	@Produce		json
+//	@Param			name	body		string	true	"category name"
+//	@Success		201		{object}	Response
+//	@Failure		400		{object}	api.ErrorResponse
+//	@Failure		500		{object}	api.ErrorResponse
+//	@Security		SessionAuth
+//	@Router			/admin/create-category [post]
+func New(categoryCreator CategoryCreator, validator *validator.Validate) api.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		const op = "handlers.category.create.New"
 		ctx := r.Context()
@@ -44,7 +57,7 @@ func New(categoryCreator CategoryCreator, validator validator.Validate) api.Hand
 		}
 
 		id, err := categoryCreator.CreateCategory(ctx, req.Name)
-		if err != nil {
+		if err != nil && !errors.Is(err, errs.ErrFailedToCash) {
 			if errors.Is(err, errs.ErrCategoryAlreadyExists) {
 				log.Error("category already exists", logger.Err(err))
 				return api.Error(errs.ErrCategoryAlreadyExists.Error(), http.StatusBadRequest)
