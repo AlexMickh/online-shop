@@ -4,3 +4,4 @@
 *.log
 /bin
 coverage.html
+store.session.sql

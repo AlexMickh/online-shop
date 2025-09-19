@@ -69,7 +69,6 @@ func TestPostgres_SaveToken(t *testing.T) {
 }
 
 func initStorage() *pgxpool.Pool {
-	// TODO: change to config vars
 	connString := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable&pool_max_conns=%s&pool_min_conns=%s",
 		os.Getenv("DB_USER"),
@@ -80,7 +79,6 @@ func initStorage() *pgxpool.Pool {
 		os.Getenv("DB_MIN_POOLS"),
 		os.Getenv("DB_MAX_POOLS"),
 	)
-	fmt.Println("ENV: ", os.Getenv("MIGRATIONS_PATH"))
 
 	pool, _ := pgxpool.New(context.Background(), connString)
 

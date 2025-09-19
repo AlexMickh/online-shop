@@ -4,10 +4,42 @@ definitions:
       error:
         type: string
     type: object
+  cart_add_product.Response:
+    properties:
+      id:
+        type: string
+    type: object
   create_category.Response:
     properties:
       id:
         type: string
+    type: object
+  create_product.Response:
+    properties:
+      id:
+        type: string
+    type: object
+  get_cart.Response:
+    properties:
+      id:
+        type: string
+      price:
+        type: number
+      products:
+        items:
+          $ref: '#/definitions/get_cart.productInfo'
+        type: array
+    type: object
+  get_cart.productInfo:
+    properties:
+      id:
+        type: string
+      image_url:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
     type: object
   get_category.Response:
     properties:
@@ -17,6 +49,48 @@ definitions:
         type: array
     type: object
   get_category.category:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  get_product.Response:
+    properties:
+      products:
+        items:
+          $ref: '#/definitions/get_product.productInfo'
+        type: array
+    type: object
+  get_product.productInfo:
+    properties:
+      id:
+        type: string
+      image_url:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  get_product_by_id.Response:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/get_product_by_id.category'
+        type: array
+      description:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  get_product_by_id.category:
     properties:
       id:
         type: string
@@ -64,6 +138,57 @@ paths:
       security:
       - SessionAuth: []
       summary: create new category
+      tags:
+      - admin
+  /admin/create-product:
+    post:
+      consumes:
+      - application/json
+      description: create new product
+      parameters:
+      - description: product name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: product description
+        in: formData
+        name: description
+        required: true
+        type: string
+      - description: product price
+        in: formData
+        name: price
+        required: true
+        type: number
+      - description: product category id
+        in: formData
+        name: category_id
+        required: true
+        type: string
+      - description: product image
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/create_product.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - SessionAuth: []
+      summary: create new product
       tags:
       - admin
   /auth/login:
@@ -179,6 +304,67 @@ paths:
       summary: verify user email
       tags:
       - auth
+  /cart:
+    get:
+      consumes:
+      - application/json
+      description: returns users cart
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/get_cart.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - SessionAuth: []
+      summary: returns users cart
+      tags:
+      - cart
+  /cart/add:
+    post:
+      consumes:
+      - application/json
+      description: add product to cart
+      parameters:
+      - description: product id
+        in: body
+        name: product_id
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/cart_add_product.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - SessionAuth: []
+      summary: add product to cart
+      tags:
+      - cart
   /category:
     get:
       consumes:
@@ -198,6 +384,68 @@ paths:
       summary: returns all categories
       tags:
       - category
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: get products
+      parameters:
+      - description: product category id
+        in: query
+        name: category_id
+        type: string
+      - description: page for pagination
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/get_product.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: get products
+      tags:
+      - products
+  /products/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get product by id
+      parameters:
+      - description: product category id
+        in: path
+        name: product_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/get_product_by_id.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: get product by id
+      tags:
+      - products
 securityDefinitions:
   SessionAuth:
     in: cookie

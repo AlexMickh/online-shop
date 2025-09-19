@@ -37,3 +37,14 @@ func (s *Service) ValidateAdminSession(ctx context.Context, sessionId string) er
 
 	return nil
 }
+
+func (s *Service) ValidateUserSession(ctx context.Context, sessionId string) (string, error) {
+	const op = "services.user.ValidateUserSession"
+
+	user, err := s.sessionRepository.SessionById(ctx, sessionId)
+	if err != nil {
+		return "", fmt.Errorf("%s: %w", op, err)
+	}
+
+	return user.ID, nil
+}

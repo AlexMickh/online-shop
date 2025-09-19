@@ -12,8 +12,13 @@ import (
 	"github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/auth/login"
 	"github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/auth/register"
 	"github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/auth/verify"
+	cart_add_product "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/cart/add-product"
+	get_cart "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/cart/get"
 	create_category "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/category/create"
 	get_category "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/category/get"
+	create_product "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/product/create"
+	get_product "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/product/get"
+	get_product_by_id "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/product/get-by-id"
 	"github.com/AlexMickh/coledzh-shop-backend/internal/server/middlewares"
 	"github.com/AlexMickh/coledzh-shop-backend/pkg/api"
 	"github.com/AlexMickh/coledzh-shop-backend/pkg/logger"
@@ -46,6 +51,25 @@ type CategoryService interface {
 
 type UserService interface {
 	ValidateAdminSession(ctx context.Context, sessionId string) error
+	ValidateUserSession(ctx context.Context, sessionId string) (string, error)
+}
+
+type ProductService interface {
+	CreateProduct(
+		ctx context.Context,
+		categoryIds []string,
+		name string,
+		description string,
+		price float32,
+		image []byte,
+	) (string, error)
+	ProductsCard(ctx context.Context, categoryId string, page int) ([]models.ProductCard, error)
+	ProductById(ctx context.Context, productId string) (models.Product, error)
+}
+
+type CartService interface {
+	AddProduct(ctx context.Context, userId, productId string) (string, error)
+	CartByUserId(ctx context.Context, userId string) (models.Cart, error)
 }
 
 // @title						Your API
@@ -62,6 +86,8 @@ func New(
 	tokenService TokenService,
 	categoryService CategoryService,
 	userService UserService,
+	productService ProductService,
+	cartService CartService,
 ) *Server {
 	const op = "server.New"
 
@@ -101,9 +127,21 @@ func New(
 		r.Get("/", api.ErrorWrapper(get_category.New(categoryService)))
 	})
 
+	r.Route("/products", func(r chi.Router) {
+		r.Get("/", api.ErrorWrapper(get_product.New(productService)))
+		r.Get("/{id}", api.ErrorWrapper(get_product_by_id.New(productService)))
+	})
+
 	r.Route("/admin", func(r chi.Router) {
 		r.Use(middlewares.Admin(userService))
 		r.Post("/create-category", api.ErrorWrapper(create_category.New(categoryService, validator)))
+		r.Post("/create-product", api.ErrorWrapper(create_product.New(validator, productService)))
+	})
+
+	r.Route("/cart", func(r chi.Router) {
+		r.Use(middlewares.User(userService))
+		r.Post("/add", api.ErrorWrapper(cart_add_product.New(validator, cartService)))
+		r.Get("/", api.ErrorWrapper(get_cart.New(cartService)))
 	})
 
 	return &Server{
