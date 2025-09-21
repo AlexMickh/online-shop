@@ -6,6 +6,7 @@ require (
 	github.com/brianvoe/gofakeit/v7 v7.5.1
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/ilyakaznacheev/cleanenv v1.5.0
+	github.com/rvinnie/yookassa-sdk-go v0.0.0-20250908195835-809ca4f1c149
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggo/swag v1.16.6
 	golang.org/x/crypto v0.42.0

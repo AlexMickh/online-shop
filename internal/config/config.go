@@ -10,12 +10,13 @@ import (
 )
 
 type Config struct {
-	Env    string       `yaml:"env" env-default:"prod"`
-	Server ServerConfig `yaml:"server"`
-	DB     DBConfig     `yaml:"db"`
-	Redis  RedisConfig  `yaml:"redis"`
-	Minio  MinioConfig  `yaml:"minio"`
-	Mail   MailConfig   `yaml:"mail"`
+	Env      string         `yaml:"env" env-default:"prod"`
+	Server   ServerConfig   `yaml:"server"`
+	DB       DBConfig       `yaml:"db"`
+	Redis    RedisConfig    `yaml:"redis"`
+	Minio    MinioConfig    `yaml:"minio"`
+	Mail     MailConfig     `yaml:"mail"`
+	Yookassa YookassaConfig `yaml:"yookassa"`
 }
 
 type ServerConfig struct {
@@ -58,6 +59,11 @@ type MailConfig struct {
 	Port     int    `env:"MAIL_PORT" yaml:"port" env-required:"true"`
 	FromAddr string `env:"MAIL_FROM_ADDR" yaml:"from_addr" env-required:"true"`
 	Password string `env:"MAIL_PASSWORD" yaml:"password" env-required:"true"`
+}
+
+type YookassaConfig struct {
+	ShopId    string `yaml:"shop_id" env-required:"true"`
+	SecretKey string `yaml:"secret_key" env-required:"true"`
 }
 
 func MustLoad() *Config {

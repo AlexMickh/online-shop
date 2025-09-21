@@ -104,7 +104,7 @@ func New(ctx context.Context, cfg *config.Config) *App {
 	cartService := cart_service.New(cartRepository)
 
 	log.Info("initing server")
-	srv := server.New(
+	srv, err := server.New(
 		ctx,
 		cfg.Server,
 		authService,
@@ -114,7 +114,12 @@ func New(ctx context.Context, cfg *config.Config) *App {
 		userService,
 		productService,
 		cartService,
+		cfg.Yookassa,
 	)
+	if err != nil {
+		log.Error("failed to init server", logger.Err(err))
+		os.Exit(1)
+	}
 
 	return &App{
 		srv: srv,

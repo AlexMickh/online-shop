@@ -71,3 +71,15 @@ func (p *Postgres) CartByUserId(ctx context.Context, userId string) (models.Cart
 
 	return cart, nil
 }
+
+func (p *Postgres) DeleteCartByUserId(ctx context.Context, userId string) error {
+	const op = "repository.postgres.cart.DeleteCartByUserId"
+
+	query := "DELETE FROM cart_items WHERE user_id = $1"
+	_, err := p.db.Exec(ctx, query, userId)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
+}

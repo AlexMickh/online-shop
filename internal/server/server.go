@@ -14,6 +14,7 @@ import (
 	"github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/auth/verify"
 	cart_add_product "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/cart/add-product"
 	get_cart "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/cart/get"
+	pay_cart "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/cart/pay"
 	create_category "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/category/create"
 	get_category "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/category/get"
 	create_product "github.com/AlexMickh/coledzh-shop-backend/internal/server/handlers/product/create"
@@ -27,6 +28,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/cors"
+	"github.com/rvinnie/yookassa-sdk-go/yookassa"
+	yoosettings "github.com/rvinnie/yookassa-sdk-go/yookassa/settings"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
@@ -70,6 +73,8 @@ type ProductService interface {
 type CartService interface {
 	AddProduct(ctx context.Context, userId, productId string) (string, error)
 	CartByUserId(ctx context.Context, userId string) (models.Cart, error)
+	CartPriceByUserId(ctx context.Context, userId string) (float32, error)
+	DeleteCartByUserId(ctx context.Context, userId string) error
 }
 
 // @title						Your API
@@ -88,7 +93,8 @@ func New(
 	userService UserService,
 	productService ProductService,
 	cartService CartService,
-) *Server {
+	yookassaConfig config.YookassaConfig,
+) (*Server, error) {
 	const op = "server.New"
 
 	r := chi.NewRouter()
@@ -96,6 +102,29 @@ func New(
 	validator := validator.New()
 	email := email.New(mailCfg)
 	session := session.New("session_id", true, false, 60*60*24*5)
+
+	yooClient := yookassa.NewClient(yookassaConfig.ShopId, yookassaConfig.SecretKey)
+	settingsHandler := yookassa.NewSettingsHandler(yooClient)
+	settings, err := settingsHandler.GetAccountSettings(nil)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if *settings.Status != yoosettings.Enabled {
+		return nil, fmt.Errorf("store is disabled")
+	}
+
+	paymentHandler := yookassa.NewPaymentHandler(yooClient)
+
+	allowedCIDRs := []string{
+		"185.71.76.0/27",
+		"185.71.77.0/27",
+		"77.75.153.0/25",
+		"77.75.156.11",
+		"77.75.156.35",
+		"77.75.154.128/25",
+		"2a02:5180::/32",
+	}
 
 	r.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -142,6 +171,12 @@ func New(
 		r.Use(middlewares.User(userService))
 		r.Post("/add", api.ErrorWrapper(cart_add_product.New(validator, cartService)))
 		r.Get("/", api.ErrorWrapper(get_cart.New(cartService)))
+		r.Post("/pay", api.ErrorWrapper(pay_cart.Pay(paymentHandler, cartService)))
+	})
+
+	r.Route("/pay", func(r chi.Router) {
+		r.Use(middlewares.IPFilterMiddleware(allowedCIDRs))
+		r.Post("/webhook", api.ErrorWrapper(pay_cart.Webhook(cartService)))
 	})
 
 	return &Server{
@@ -152,7 +187,7 @@ func New(
 			WriteTimeout: cfg.Timeout,
 			IdleTimeout:  cfg.IdleTimeout,
 		},
-	}
+	}, nil
 }
 
 func (s *Server) Run(ctx context.Context) error {
